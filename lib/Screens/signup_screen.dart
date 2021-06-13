@@ -30,7 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
   IconData errorIcon;
   double errorContainerHeight = 0.0;
   String fileName;
-  String path;
+  String path = '';
   String massage;
   Map<String, String> paths;
   List<String> extensions = ['txt', 'pdf', 'doc'];
@@ -142,20 +142,19 @@ class _RegisterPageState extends State<RegisterPage> {
     var response = await http.post(
         "https://www.hiringmirror.com/api/varify-email-address.php",
         body: data);
-    print(response.body.toString());
 
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
-      print(" response" + jsonData.toString());
       var status = jsonData['code'];
-      print("email verify response status code" + status.toString());
       var massage = jsonData['message'];
+      print('ckkk' + massage);
       if (status == '200') {
         //var massage = jsonData['message'];
         print("email verify massage" + massage.toString());
-      } else if (status == 401) {
-        return 'Email already exist!';
       }
+    }
+    if (response.statusCode == 401) {
+      return 'Email already exist';
     }
   }
 
@@ -331,10 +330,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         new Expanded(
                           child: TextFormField(
                             controller: _emailController,
-                            onFieldSubmitted: (email) {
-                              emailVerification(email, context).then((value) {
+                            onChanged: (value) {
+                              print("ckrk");
+                              emailVerification(value, context).then((value) {
                                 setState(() {
                                   massage = value;
+                                  print(value);
                                 });
                               });
                             },
@@ -349,7 +350,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       ],
                     ),
                   ),
-                  if (massage != null) Text(massage),
+                  if (massage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 40),
+                      child: Text(
+                        massage.toString(),
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(left: 40.0, top: 1),
                     child: Text(
@@ -586,7 +594,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           height: 40,
                           child: ElevatedButton(
                             onPressed: () {
-                              validation();
+                              if (massage == null) validation();
                               //   validation(context);
                             },
                             child: Container(
@@ -623,7 +631,7 @@ class _RegisterPageState extends State<RegisterPage> {
     String lastName = _lastNameController.text;
     String mobileNum = _mobileController.text;
     String paths = path.toString();
-    // File resumeAdd  = _resumeController;
+
     if (firstName.isEmpty) {
       Generalfunction().showToast('Please enter first name');
     } else if (firstName.length < 3) {
